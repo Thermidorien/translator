@@ -65,36 +65,52 @@ class TranslatorApp:
         # Define the creation of all GUI widgets
         
         def create_widgets(self):
-            self.word_label = tk.Label(self.root, text=self.english_words[self.index], bg="lightgreen")
+            
+            # English word as a label
+            
+            self.word_label = tk.Label(self.root, text=self.english_words[self.index], bg="lightblue")
             self.word_label.pack()
             
-
+            # Entry for written arabic word
+            
+            self.word_entry = tk.Entry(self.root, width=30)
+            self.word_entry.pack()      
+            
+            # button for next word 
+            
+            self.button_next = tk.Button(self.root, text="Next", command=self.next_word)
+            self.button_next.pack()
+            
+            # button for check word 
+            
+            self.button_check = tk.Button(self.root, text="Check", command=self.check_word)
+            self.button_check.pack()        
         
+        # define word update functions
         
-  
+        def next_word():
+            self.current_index = random.randint(0, len(self.english_words)-1)   
+            self.word_label.config(text=self.english_words[self.index])  # Update label text
+            self.word_entry.config(text="", bg="white")                  # clear word entry for next input
+            
+        def check_word():
+            user_input = self.word_entry.get().strip()
+            correct_answer = self.arabic_latin_words[self.current_index].lower()
+            if (user_input.lower() == correct_answer):
+                self.word_entry.config(bg="green")
+            else:
+                self.word_entry.config(bg="red")
 
-
-
-####### Update widgets
-
-def next_word():
-    index = random.randint(0, len(english_words)-1)   
-    label1.config(text=english_words[index])  # Update label text
-    
-def check_word():
-    word_input = word_entry.get().strip()
-    if (word_input.lower() == 1):
+####### Creating and calling application
+   
+if __name__ == "__main__":      # this is true when the script is ran directly, i.e. python .\translator.py. It's fine if this is built as an .exe
+    root = tk.Tk()              # Tk() is the constructor for the top-level window
+    app = TranslatorApp(root)   
+    root.mainloop()             # the event loop is required to keep the window open, otherwise it would instanteneouslyclose
         
-    
-    
-####### Labels and containters
 
-button_next = tk.Button(root, text="Next", command=next_word)
-button_next.pack()
 
-word_entry = tk.Entry(root, width=30)
-word_entry.pack()
-
+####### To add elsewhere for background
 
 # Load the image
 """ background_path = os.path.join(script_dir, "resources", "image2.png") 
@@ -105,10 +121,5 @@ bg_image = PhotoImage(file=background_path) """
 bg_label.place(x=0, y=0, relwidth=1, relheight=1)  # Covers the entire window """
 
 
-####### Creating application
-
-root = tk.Tk()          # Tk() is the constructor for the top-level window
 
 
-
-root.mainloop()         # the event loop is required to keep the window open, otherwise it would instanteneouslyclose
