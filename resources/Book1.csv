@@ -1,0 +1,31 @@
+tag,word_type,arabic,english,singular
+1: most frequent,adv,شوي,a little,shway
+1: most frequent,n,كتير	a lot,ktir
+1: most frequent,p,عن,about,3an
+1: most frequent,p,فوق,above,fo2
+1: most frequent,p,بعد,after,ba3d
+1: most frequent,n,كلّ,all,kil
+1: most frequent,adv,كمان,also,kamen
+1: most frequent,p,و,and,w
+1: most frequent,adj,آخر,another,akhar
+1: most frequent,v,سأل,ask,sa2al
+1: most frequent,v,كان,be,kan
+1: most frequent,p,لأنّ,because,la2an
+1: most frequent,v,بلّش,begin,balesh
+1: most frequent,p,بين,between,bayn
+1: most frequent,adj,كبير,big,kbir
+politics,n,إجهاض,abortion,ajhad
+politics,n,كتائب شهداء الأقصى,Al-Aqsa Martyrs' Brigade,kata2eb shohada al aqsa
+politics,n,تنظيم القاعدة,Al-Qaeda,tanzim al qa3ida
+politics,n,تحالف,alliance,ta7alef
+politics,n,أميركا,America,amerka
+politics,adj,أميركي,American,amerke
+politics,adj,أميركاني,American,amerkane
+politics,n,منظمة العفو الدولية,Amnesty International,manzame al 3afo al dawliye
+politics,n,معاداة السامية,anti-Semitism,al ma3ada al semiye
+politics,n,إغتيال,assassination,eghtiyal
+politics,n,تكليف,assignment,taklif
+politics,n,سلطة,authority,sulta
+politics,n,ابتزاز,blackmail,abtzaz
+politics,n,إخوان,brothers,ekhwan
+politics,adj,أهلي,civil,ahle
