@@ -24,13 +24,11 @@ class TranslatorApp:
         ####### Setting up application
 
         self.root = root
-        self.root.title("Translator")
-        self.root.geometry("400x400")
+        self.aspect_ratio = 1/2
+        self._setup_window()
                         
         self._setup_icon()
-        
-        # setting up icon
-        
+                
         ####### Initialize arrays for CSV reading
         
         self._init_data()
@@ -40,16 +38,36 @@ class TranslatorApp:
         self.load_csv_data()
         
         ####### Creating widgets and containers
-        
-        # index
-        
-        self.current_index = random.randint(0, len(self.english_words)-1)     
+               
+        self.current_index = random.randint(0, len(self.english_words)-1)     # set up index
         
         self.create_widgets()
              
         
     
     ####### Defining other functions
+    
+    # Defining function to set up the window
+    
+    def _setup_window(self):
+        self.root.title("Translator")
+        initial_width = 300
+        initial_height = int(initial_width / self.aspect_ratio)
+        self.root.geometry(str(initial_width) + "x" + str(initial_height))
+        self.root.bind("<Configure>", self._fix_aspect_ratio)
+        
+    # Defining function to fix aspect ratio
+    
+    def _fix_aspect_ratio(self, event):
+        if event.widget == self.root:       # indicating this only occurs on the main window
+            new_width = event.width
+            new_height = int(new_width / self.aspect_ratio)
+            
+            
+            # this can create an infinite loop: User resizes window → `<Configure>` event → `geometry()` changes size → Another `<Configure>` event → `geometry()` changes size → ... (∞ loop)
+            # to avoid this we fix the size the moment the event is finished and the size of the window is different from the original size
+            if ((event.width, event.height) != (new_width, new_height)):
+                self.root.geometry(str(new_width) + "x" + str(new_height))  
     
     # Defining internal function: icon setup
         
@@ -87,25 +105,28 @@ class TranslatorApp:
     
     def create_widgets(self):
         
+        self.root.grid_rowconfigure(0, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
+        
         # English word as a label
         
         self.word_label = tk.Label(self.root, text=self.english_words[self.current_index], bg="lightblue")
-        self.word_label.pack()
+        self.word_label.grid(row=0, column=0)
         
         # Entry for written arabic word
         
-        self.word_entry = tk.Entry(self.root, width=30)
-        self.word_entry.pack()      
-        
-        # button for next word 
-        
-        self.button_next = tk.Button(self.root, text="Next", command=self.next_word)
-        self.button_next.pack()
+        self.word_entry = tk.Entry(self.root, width=40)
+        self.word_entry.grid(row=1, column=0)      
         
         # button for check word 
         
         self.button_check = tk.Button(self.root, text="Check", command=self.check_word)
-        self.button_check.pack()        
+        self.button_check.grid(row=0, column=1)  
+        
+        # button for next word 
+        
+        self.button_next = tk.Button(self.root, text="Next", command=self.next_word)
+        self.button_next.grid(row=1, column=1)     
     
     # Define word update functions for buttons
     
@@ -148,5 +169,18 @@ def setup_background(self):
         print(f"Background not loaded: {e}")
 """
 
+
+"""
+remaining checklist:
+1. constant aspect ratio
+2. checking if we can hide labels
+3. checking if we can either hide or grey out buttons
+4. maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells
+5. adding new labels and buttons for remaining csv columns
+6. adding front page to select word tags (Implement word categories/filtering)
+7. adding background
+8. setting enter as "Check"
+9. mprove the visual design
+"""
 
 
