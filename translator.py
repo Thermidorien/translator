@@ -24,7 +24,7 @@ class TranslatorApp:
         ####### Setting up application
 
         self.root = root
-        self.aspect_ratio = 1/2
+        self.aspect_ratio = 1/2 
         self._setup_window()
                         
         self._setup_icon()
@@ -42,33 +42,57 @@ class TranslatorApp:
         self.current_index = random.randint(0, len(self.english_words)-1)     # set up index
         
         self.create_widgets()
-             
-        
-    
+                 
     ####### Defining other functions
     
     # Defining function to set up the window
-    
+        
     def _setup_window(self):
         self.root.title("Translator")
+        # self.root.minsize(300, int(300 / self.aspect_ratio))  # Enforce minimum size
         initial_width = 300
         initial_height = int(initial_width / self.aspect_ratio)
         self.root.geometry(str(initial_width) + "x" + str(initial_height))
         self.root.bind("<Configure>", self._fix_aspect_ratio)
+        self._resize_active = False 
         
-    # Defining function to fix aspect ratio
-    
+#User starts resizing window
+#<Configure> event fires
+#_fix_aspect_ratio() is called
+#Inside _fix_aspect_ratio:
+#Checks if event.widget != self.root or self._resize_active → continues
+#Sets self._resize_active = True (LOCK)
+#Unbinds the <Configure> event (temporarily stops listening)
+#Applies new geometry with geometry()
+#Schedules _enable_resize_checking() to run after 10ms
+#10ms later:
+#_enable_resize_checking() executes:
+#Sets self._resize_active = False (UNLOCK)
+#Rebinds <Configure> to _fix_aspect_ratio
+
     def _fix_aspect_ratio(self, event):
-        if event.widget == self.root:       # indicating this only occurs on the main window
-            new_width = event.width
-            new_height = int(new_width / self.aspect_ratio)
+        
+        if event.widget != self.root or self._resize_active:       # indicating that fixing aspect ratio definition only occurs on the main window and when Resize is already being processed
+            return
+        
+        new_width = event.width
+        new_height = int(new_width / self.aspect_ratio)
             
             
-            # this can create an infinite loop: User resizes window → `<Configure>` event → `geometry()` changes size → Another `<Configure>` event → `geometry()` changes size → ... (∞ loop)
-            # to avoid this we fix the size the moment the event is finished and the size of the window is different from the original size
-            if ((event.width, event.height) != (new_width, new_height)):
-                self.root.geometry(str(new_width) + "x" + str(new_height))  
-    
+        # this can create an infinite loop: User resizes window → `<Configure>` event → `geometry()` changes size → Another `<Configure>` event → `geometry()` changes size → ... (∞ loop)
+        # to avoid this we fix the size the moment the event is finished and the size of the window is different from the original size
+        if (event.height != new_height):
+            # Temporarily disable the handler to prevent recursion
+            self._resize_active = True 
+            self.root.unbind("<Configure>")
+            self.root.geometry(str(new_width) + "x" + str(new_height))  
+            self.root.after(10, self._enable_resize_checking)  # Delay resize
+            
+    def _enable_resize_checking(self):
+        self._resize_active = False
+        self.root.bind("<Configure>", self._fix_aspect_ratio)
+
+                
     # Defining internal function: icon setup
         
     def _setup_icon(self):
@@ -169,10 +193,9 @@ def setup_background(self):
         print(f"Background not loaded: {e}")
 """
 
-
 """
 remaining checklist:
-1. constant aspect ratio
+1. constant aspect ratio // DONE
 2. checking if we can hide labels
 3. checking if we can either hide or grey out buttons
 4. maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells
@@ -183,4 +206,11 @@ remaining checklist:
 9. mprove the visual design
 """
 
-
+# The position requires a Bachelor’s degree in Software Engineering, Computer Science, or a related field and eight 
+# (8) years of experience in the job offered or in an acceptable alternate occupation.  
+# Alternately, will accept a Master’s degree in Software Engineering, Computer Science, 
+# or related field and six (6) years of experience in the job offered or in an acceptable alternate occupation. 
+# The position requires five (5) years of experience with the following: Manual testing; 
+# QA tools, such as Selenium, Appium, Zephyr, Applitools, or test rail and strategies, such as BDD or TDD; 
+# Agile and Scrum methodology; and Test automation architecture and methodologies.  The position requires four 
+# (4) years of experience with CI/CD Pipeline environment.  20% domestic travel required.
