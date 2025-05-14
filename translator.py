@@ -93,7 +93,6 @@ class TranslatorApp:
         self._resize_active = False
         self.root.bind("<Configure>", self._fix_aspect_ratio)
 
-
     # Defining internal function: icon setup
 
     def _setup_icon(self):
@@ -147,48 +146,49 @@ class TranslatorApp:
         # English word as a label
 
         self.word_label = tk.Label(self.root, text=self.english_words[self.current_index], font=("Arial", 15), bg="lightblue")
-        self.word_label.grid(row=0, column=0, sticky="nsew")    # sticky sets the limits of cell, sticking the widget to the limits. nsew are coordinates, north south east west
+        self.word_label.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")    # sticky sets the limits of cell, sticking the widget to the limits. nsew are coordinates, north south east west
+
+        # toggle boolean counter
+        self.show_is_visible = False
 
         # Translation as a label
 
         self.translation_label = tk.Label(self.root, text=self.arabic_latin_words[self.current_index], font=("Arial", 15), bg="white")
-        self.translation_label.grid(row=1, column=0, sticky="nsew")
+        self.translation_label.grid(row=1, column=0, padx=10, pady=20, sticky="nsew")
         self.translation_label.grid_remove()
-        self.show_is_visible = False
         
         # Translation in arabic as a label
 
         self.arabic_translation_label = tk.Label(self.root, text=self.arabic_words[self.current_index], font=("Arial", 15), bg="white")
-        self.arabic_translation_label.grid(row=2, column=0, sticky="nsew")
+        self.arabic_translation_label.grid(row=2, column=0, padx=10, pady=20, sticky="nsew")
         self.arabic_translation_label.grid_remove()
-        self.show_is_visible = False
 
         # Entry for written arabic word
 
-        self.word_entry = tk.Entry(self.root, width=20, font=("Arial", 15))
-        self.word_entry.grid(row=3, column=0, sticky="ew")
+        self.word_entry = tk.Entry(self.root, width=20, font=("Arial", 15), justify="center")
+        self.word_entry.grid(row=3, column=0, padx=10, pady=20, sticky="ew")
         self.word_entry.focus_set()  # putting cursor in entry box by default
-        self.word_entry.bind("<Return>", self.check_word)   # clicking enter while typing in the entry box is the same as clicking on check
+        self.word_entry.bind("<Return>", self.binding_enter)   # clicking enter while typing in the entry box is the same as clicking on check
 
         # English word as a label
 
         self.word_type_label = tk.Label(self.root, text=self.word_types[self.current_index], font=("Arial", 15), bg="lightblue")
-        self.word_type_label.grid(row=0, column=1, sticky="nsew") 
+        self.word_type_label.grid(row=0, column=1, padx=10, pady=20, sticky="nsew") 
         
         # button for show translation
 
         self.button_show_hide = tk.Button(self.root, text="Show", font=("Arial", 15), command=self.toggle_answer)
-        self.button_show_hide.grid(row=1, column=1, sticky="nsew")
+        self.button_show_hide.grid(row=1, column=1, padx=10, pady=20, sticky="nsew")
         
         # button for check word
 
         self.button_check = tk.Button(self.root, text="Check", font=("Arial", 15), command=self.check_word)
-        self.button_check.grid(row=2, column=1, sticky="nsew")
+        self.button_check.grid(row=2, column=1, padx=10, pady=20, sticky="nsew")
 
         # button for next word
 
         self.button_next = tk.Button(self.root, text="Next", font=("Arial", 15), command=self.next_word)
-        self.button_next.grid(row=3, column=1, sticky="nsew")
+        self.button_next.grid(row=3, column=1, padx=10, pady=20, sticky="nsew")
 
     # Define word update functions for buttons
 
@@ -208,17 +208,25 @@ class TranslatorApp:
         self.arabic_translation_label.grid_remove()
         self.button_show_hide.config(text="Show")
         
-        
+        # clearing entry
         self.word_entry.delete(0, tk.END)                            # clear word entry for next input
         self.word_entry.config(bg="white")                           # clear word entry for next input
+        
+        # reset button state
+        self.button_check.config(state="normal")
+        self.button_show_hide.config(state="normal")  
 
     # define checking entry
         
-    def check_word(self, event=None):        # Adding event in case Enter key on keyboard is clicked. It has to be set equal to None, because otherwise an error gets called when clicking on the button instead of typing enter, since the event is undefined otherwise
+    def check_word(self):       
         user_input = self.word_entry.get().strip()
         correct_answer = self.arabic_latin_words[self.current_index].lower()
         if (user_input.lower() == correct_answer):
             self.word_entry.config(bg="lightgreen")
+            self.button_check.config(state="disabled")
+            if not self.show_is_visible:
+                self.toggle_answer()     
+            self.button_show_hide.config(state="disabled")  
         else:
             self.word_entry.config(bg="pink")
             
@@ -234,6 +242,15 @@ class TranslatorApp:
             self.translation_label.grid()
             self.button_show_hide.config(text="Hide")
         self.show_is_visible = not self.show_is_visible
+        
+    # Defining the binding to Enter key ependng on the status of the entry, whether correct or not
+        
+    def binding_enter(self, event=None):     # Adding event in case Enter key on keyboard is clicked. It has to be set equal to None, because otherwise an error gets called when clicking on the button instead of typing enter, since the event is undefined otherwise
+        if self.button_check.cget("state") == "disabled":   # 
+            self.next_word()
+        else:
+            self.check_word()
+            
 
 ####### Creating and calling application
 
@@ -241,7 +258,6 @@ if __name__ == "__main__":      # this is true when the script is ran directly, 
     root = tk.Tk()              # Tk() is the constructor for the top-level window
     app = TranslatorApp(root)
     root.mainloop()             # the event loop is required to keep the window open, otherwise it would instanteneouslyclose
-
 
 
 ####### To add elsewhere for background
@@ -264,7 +280,16 @@ def setup_background(self):
 remaining checklist:
 1. constant aspect ratio // DONE
 2. checking if we can hide labels // DONE
-3. checking if we can either hide or grey out buttons
+3. checking if we can either hide or grey out buttons 
+    --> Wanted behaviour: 
+        --> when success after check (in check_word) (done)
+        --> grey check button (in check_word) (done)
+        --> click on show (unless already showing aka if text is hide) (in check_word) (done)
+        --> grey show button (hide by then) (in check_word) (done)
+        --> change event bind Enter to Next button (done)
+        --> change states of button back to normal after hitting next (in next_word) (done)
+        --> revert bind event Enter to check button (done)
+ 
 4. maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells// DONE
 5. adding new labels and buttons for remaining csv columns // DONE
 6. adding front page to select word tags (Implement word categories/filtering)
