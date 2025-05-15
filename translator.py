@@ -181,17 +181,50 @@ class TranslatorApp:
         
         # button for show translation
 
-        self.button_show_hide = tk.Button(self.root, text="Show", font=("Arial", 15), command=self.toggle_answer)
+        self.button_show_hide = tk.Button(
+            self.root, 
+            text="Show", 
+            font=("Arial", 15), 
+            fg="white",                     # text color
+            bg="#e20004",                   # background color
+            activebackground="#c32834",     # when hovered or clicked
+            activeforeground="white",       # text color when clicked
+            relief="raised",                # border style: "flat", "raised", "sunken", "ridge", "groove"
+            bd=5,                           # border width
+            command=self.toggle_answer
+        )
         self.button_show_hide.grid(row=1, column=1, padx=10, pady=20, sticky="nsew")
         
         # button for check word
 
-        self.button_check = tk.Button(self.root, text="Check", font=("Arial", 15), command=self.check_word)
+        self.button_check = tk.Button(
+            self.root, 
+            text="Check", 
+            font=("Arial", 15), 
+            fg="white", 
+            bg="#18a5c0", 
+            activebackground="#0085b0", 
+            activeforeground="white", 
+            relief="raised", 
+            bd=5, 
+            command=self.check_word
+        )
         self.button_check.grid(row=2, column=1, padx=10, pady=20, sticky="nsew")
 
         # button for next word
 
-        self.button_next = tk.Button(self.root, text="Next", font=("Arial", 15), command=self.next_word)
+        self.button_next = tk.Button(
+            self.root, 
+            text="Next", 
+            font=("Arial", 15), 
+            fg="white", 
+            bg="#f7a23a", 
+            activebackground="#fc8424", 
+            activeforeground="white", 
+            relief="raised", 
+            bd=5, 
+            command=self.next_word
+        )
         self.button_next.grid(row=3, column=1, padx=10, pady=20, sticky="nsew")
 
     # Define word update functions for buttons
@@ -301,14 +334,5 @@ remaining checklist:
 6. adding front page to select word tags (Implement word categories/filtering)
 7. adding background // DONE
 8. setting enter as "Check" // DONE
-9. Improve the visual design
+9. Improve the visual design // DONE
 """
-
-# The position requires a Bachelor’s degree in Software Engineering, Computer Science, or a related field and eight
-# (8) years of experience in the job offered or in an acceptable alternate occupation.
-# Alternately, will accept a Master’s degree in Software Engineering, Computer Science,
-# or related field and six (6) years of experience in the job offered or in an acceptable alternate occupation.
-# The position requires five (5) years of experience with the following: Manual testing;
-# QA tools, such as Selenium, Appium, Zephyr, Applitools, or test rail and strategies, such as BDD or TDD;
-# Agile and Scrum methodology; and Test automation architecture and methodologies.  The position requires four
-# (4) years of experience with CI/CD Pipeline environment.  20% domestic travel required.
