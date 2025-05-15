@@ -2,7 +2,7 @@ import tkinter as tk            # required to make application
 import random
 import os               # os.path allows to construct a cross-platform path
 import csv
-# from tkinter import PhotoImage  # required to import images like background
+from tkinter import PhotoImage  # required to import images like background
 
 class TranslatorApp:
 
@@ -17,9 +17,9 @@ class TranslatorApp:
 
         ####### Establishing paths
 
-        script_dir = os.path.dirname(os.path.abspath(__file__))             # gets absolute path of this file, then gets direcory
-        self.icon_path = os.path.join(script_dir, "resources", "icon.ico")       # Icon in the resources folder
-        self.csv_path = os.path.join(script_dir, "resources", "book1.csv")        # CSV in the resources folder
+        self.script_dir = os.path.dirname(os.path.abspath(__file__))             # gets absolute path of this file, then gets direcory
+        self.icon_path = os.path.join(self.script_dir, "resources", "icon.ico")       # Icon in the resources folder
+        self.csv_path = os.path.join(self.script_dir, "resources", "book1.csv")        # CSV in the resources folder
 
         ####### Setting up application
 
@@ -43,6 +43,10 @@ class TranslatorApp:
         self.current_index = random.randint(0, len(self.english_words)-1)     # set up index
 
         self.create_widgets()
+        
+        ####### Creating background
+        
+        self.setup_background()
 
     ####### Defining other functions
 
@@ -250,7 +254,19 @@ class TranslatorApp:
             self.next_word()
         else:
             self.check_word()
-            
+           
+    # Defining background setup
+    
+    def setup_background(self):
+        try:
+            self.background_path = os.path.join(self.script_dir, "resources", "image.png")
+            self.bg_image = PhotoImage(file=self.background_path)
+            self.bg_label = tk.Label(self.root, image=self.bg_image)
+            self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+            self.bg_label.lower()
+        except Exception as e:
+            print("Background not loaded: " + str(e))
+     
 
 ####### Creating and calling application
 
@@ -260,27 +276,17 @@ if __name__ == "__main__":      # this is true when the script is ran directly, 
     root.mainloop()             # the event loop is required to keep the window open, otherwise it would instanteneouslyclose
 
 
-####### To add elsewhere for background
 
-"""
-def setup_background(self):
-    # Optional background setup
-    try:
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        background_path = os.path.join(script_dir, "resources", "image2.png")
-        self.bg_image = PhotoImage(file=background_path)
-        self.bg_label = tk.Label(self.root, image=self.bg_image)
-        self.bg_label.place(x=0, y=0, relwidth=1, relheight=1)
-        self.bg_label.lower()
-    except Exception as e:
-        print(f"Background not loaded: {e}")
-"""
+
+
+
+####### for later
 
 """
 remaining checklist:
 1. constant aspect ratio // DONE
 2. checking if we can hide labels // DONE
-3. checking if we can either hide or grey out buttons 
+3. checking if we can either hide or grey out buttons // DONE
     --> Wanted behaviour: 
         --> when success after check (in check_word) (done)
         --> grey check button (in check_word) (done)
@@ -293,8 +299,16 @@ remaining checklist:
 4. maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells// DONE
 5. adding new labels and buttons for remaining csv columns // DONE
 6. adding front page to select word tags (Implement word categories/filtering)
-7. adding background
+7. adding background // DONE
 8. setting enter as "Check" // DONE
 9. Improve the visual design
 """
 
+# The position requires a Bachelor’s degree in Software Engineering, Computer Science, or a related field and eight
+# (8) years of experience in the job offered or in an acceptable alternate occupation.
+# Alternately, will accept a Master’s degree in Software Engineering, Computer Science,
+# or related field and six (6) years of experience in the job offered or in an acceptable alternate occupation.
+# The position requires five (5) years of experience with the following: Manual testing;
+# QA tools, such as Selenium, Appium, Zephyr, Applitools, or test rail and strategies, such as BDD or TDD;
+# Agile and Scrum methodology; and Test automation architecture and methodologies.  The position requires four
+# (4) years of experience with CI/CD Pipeline environment.  20% domestic travel required.
