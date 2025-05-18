@@ -9,16 +9,17 @@ class TagSelector:
     def __init__(self, root, start_app):
         
         """
-        Initialize the set of tags to be used.
+        Set up front page for the set of tags to be used for this application.
 
         Arguments:
             root (tk.Tk): Main application window
+            start_app   : self.setup_initialization to initialize the application after the tags are chosen
         """
         
         self.root = root
         self.start_app = start_app
               
-        self.frame = tk.Frame(root, bg='')  
+        self.frame = tk.Frame(root, bg='')  # bg='' makes sure the frame has no background
         # self.frame.grid(row=0, column=0, sticky="nsew")   
         self.frame.pack(fill='both', expand=True)   
         
@@ -187,15 +188,15 @@ class TranslatorApp:
 
     def create_widgets(self):
 
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_rowconfigure(2, weight=1)
-        self.root.grid_rowconfigure(3, weight=1)
+        self.root.grid_rowconfigure(0, weight=5)
+        self.root.grid_rowconfigure(1, weight=5)
+        self.root.grid_rowconfigure(2, weight=5)
+        self.root.grid_rowconfigure(3, weight=5)
+        self.root.grid_rowconfigure(4, weight=1)
         self.root.grid_columnconfigure(0, weight=2)
         self.root.grid_columnconfigure(1, weight=1)
 
         # English word as a label
-
         self.word_label = tk.Label(self.root, text=self.english_words[self.current_index], font=("Arial", 15), bg="lightblue")
         self.word_label.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")    # sticky sets the limits of cell, sticking the widget to the limits. nsew are coordinates, north south east west
 
@@ -203,31 +204,26 @@ class TranslatorApp:
         self.show_is_visible = False
 
         # Translation as a label
-
         self.translation_label = tk.Label(self.root, text=self.arabic_latin_words[self.current_index], font=("Arial", 15), bg="white")
         self.translation_label.grid(row=1, column=0, padx=10, pady=20, sticky="nsew")
         self.translation_label.grid_remove()
         
         # Translation in arabic as a label
-
         self.arabic_translation_label = tk.Label(self.root, text=self.arabic_words[self.current_index], font=("Arial", 15), bg="white")
         self.arabic_translation_label.grid(row=2, column=0, padx=10, pady=20, sticky="nsew")
         self.arabic_translation_label.grid_remove()
 
         # Entry for written arabic word
-
         self.word_entry = tk.Entry(self.root, width=20, font=("Arial", 15), justify="center")
         self.word_entry.grid(row=3, column=0, padx=10, pady=20, sticky="ew")
         self.word_entry.focus_set()  # putting cursor in entry box by default
         self.word_entry.bind("<Return>", self.binding_enter)   # clicking enter while typing in the entry box is the same as clicking on check
 
         # English word as a label
-
         self.word_type_label = tk.Label(self.root, text=self.word_types[self.current_index], font=("Arial", 15), bg="lightblue")
         self.word_type_label.grid(row=0, column=1, padx=10, pady=20, sticky="nsew") 
         
         # button for show translation
-
         self.button_show_hide = tk.Button(
             self.root, 
             text="Show", 
@@ -243,7 +239,6 @@ class TranslatorApp:
         self.button_show_hide.grid(row=1, column=1, padx=10, pady=20, sticky="nsew")
         
         # button for check word
-
         self.button_check = tk.Button(
             self.root, 
             text="Check", 
@@ -259,7 +254,6 @@ class TranslatorApp:
         self.button_check.grid(row=2, column=1, padx=10, pady=20, sticky="nsew")
 
         # button for next word
-
         self.button_next = tk.Button(
             self.root, 
             text="Next", 
@@ -273,6 +267,21 @@ class TranslatorApp:
             command=self.next_word
         )
         self.button_next.grid(row=3, column=1, padx=10, pady=20, sticky="nsew")
+        
+        # button for return to tag selector
+        self.to_tag_selector = tk.Button(
+            self.root, 
+            text="Return to tag selection", 
+            font=("Arial", 15), 
+            fg="white", 
+            bg="#383328", 
+            activebackground="#706653", 
+            activeforeground="white", 
+            relief="raised", 
+            bd=5, 
+            command=self.return_to_tag_selector
+        )
+        self.to_tag_selector.grid(row=4, column=0, columnspan=2, padx=80, pady=5, sticky="nsew")
 
     # Define word update functions for buttons
 
@@ -314,6 +323,15 @@ class TranslatorApp:
         else:
             self.word_entry.config(bg="pink")
             
+    # define returning to tag selector
+    
+    def return_to_tag_selector(self):
+        self.children = self.root.winfo_children()
+        for widget in self.children:
+            if widget != self.bg_label:
+                widget.destroy()
+        TagSelector(self.root, self.setup_initialization)
+    
     # define toggling the answer labels
 
     def toggle_answer(self):
@@ -378,7 +396,7 @@ remaining checklist:
  
 4. maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells// DONE
 5. adding new labels and buttons for remaining csv columns // DONE
-6. adding front page to select word tags (Implement word categories/filtering)
+6. adding front page to select word tags (Implement word categories/filtering) // IN PROGRESS
 7. adding background // DONE
 8. setting enter as "Check" // DONE
 9. Improve the visual design // DONE
