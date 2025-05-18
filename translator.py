@@ -6,7 +6,7 @@ from tkinter import PhotoImage  # required to import images like background
 
 class TagSelector:
     
-    def __init__(self, root, start_app):
+    def __init__(self, root, start_app, tag_path):
         
         """
         Set up front page for the set of tags to be used for this application.
@@ -17,8 +17,9 @@ class TagSelector:
         """
         
         self.root = root
+        
         self.start_app = start_app
-              
+        self.tag_path = tag_path
         self.frame = tk.Frame(root, bg='')  # bg='' makes sure the frame has no background
         # self.frame.grid(row=0, column=0, sticky="nsew")   
         self.frame.pack(fill='both', expand=True)   
@@ -26,9 +27,9 @@ class TagSelector:
         # self.frame.grid_columnconfigure(0, weight=1)
         # self.frame.grid_rowconfigure(0, weight=1)
         
-        self.test = tk.Button(
+        self.button_load_tags = tk.Button(
             self.frame, 
-            text="Test", 
+            text="Load Tags", 
             font=("Arial", 15), 
             fg="white",                     # text color
             bg="#e20004",                   # background color
@@ -39,7 +40,41 @@ class TagSelector:
             command=self.return_to_app 
         )
         # self.test.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")
-        self.test.pack(padx=50, pady=50, anchor='w') 
+        self.button_load_tags.pack(padx=50, pady=50, anchor='w') 
+        
+        self.tags = self.load_tags()
+        self.tag_vars = {}
+        
+        for tag in self.tags:
+            variable = tk.BooleanVar()
+            tk.Checkbutton(self.frame, var=variable, text=tag, font=("Arial", 15)).pack(padx=50, pady=2, anchor='w')
+            self.tag_vars[tag] = variable
+        
+        self.test = tk.Button(
+            self.frame, 
+            text="test", 
+            font=("Arial", 15), 
+            fg="white",                     # text color
+            bg="#e20004",                   # background color
+            activebackground="#c32834",     # when hovered or clicked
+            activeforeground="white",       # text color when clicked
+            relief="raised",                # border style: "flat", "raised", "sunken", "ridge", "groove"
+            bd=5,                           # border width
+            command=self.test 
+        ).pack()
+        
+    def test(self):
+        for tag in self.tags:
+            print(self.tag_vars.get(tag).get())    
+        
+    def load_tags(self):
+        tags = set()
+        with open(self.tag_path, 'r', encoding='utf-8') as file:
+            csv_reader = csv.DictReader(file) 
+            for row in csv_reader:
+                tags.add(row.get('tag'))
+        return tags
+        
         
     def return_to_app(self):
         
@@ -79,7 +114,7 @@ class TranslatorApp:
         
         self.setup_background()
         
-        TagSelector(self.root, self.setup_initialization)
+        TagSelector(self.root, self.setup_initialization, self.csv_path)
         
     def setup_initialization(self):
 
@@ -330,7 +365,7 @@ class TranslatorApp:
         for widget in self.children:
             if widget != self.bg_label:
                 widget.destroy()
-        TagSelector(self.root, self.setup_initialization)
+        TagSelector(self.root, self.setup_initialization, self.csv_path)
     
     # define toggling the answer labels
 
