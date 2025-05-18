@@ -4,6 +4,49 @@ import os               # os.path allows to construct a cross-platform path
 import csv
 from tkinter import PhotoImage  # required to import images like background
 
+class TagSelector:
+    
+    def __init__(self, root, start_app):
+        
+        """
+        Initialize the set of tags to be used.
+
+        Arguments:
+            root (tk.Tk): Main application window
+        """
+        
+        self.root = root
+        self.start_app = start_app
+              
+        self.frame = tk.Frame(root, bg='')  
+        # self.frame.grid(row=0, column=0, sticky="nsew")   
+        self.frame.pack(fill='both', expand=True)   
+        
+        # self.frame.grid_columnconfigure(0, weight=1)
+        # self.frame.grid_rowconfigure(0, weight=1)
+        
+        self.test = tk.Button(
+            self.frame, 
+            text="Test", 
+            font=("Arial", 15), 
+            fg="white",                     # text color
+            bg="#e20004",                   # background color
+            activebackground="#c32834",     # when hovered or clicked
+            activeforeground="white",       # text color when clicked
+            relief="raised",                # border style: "flat", "raised", "sunken", "ridge", "groove"
+            bd=5,                           # border width
+            command=self.return_to_app 
+        )
+        # self.test.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")
+        self.test.pack(padx=50, pady=50, anchor='w') 
+        
+    def return_to_app(self):
+        
+        self.frame.destroy()
+        self.start_app()
+    
+    
+
 class TranslatorApp:
 
     def __init__(self, root):
@@ -25,10 +68,19 @@ class TranslatorApp:
 
         self.root = root
         self.aspect_ratio = 9/16
-
+        
+        ####### Setting up window and icon
+        
         self._setup_window()
-
         self._setup_icon()
+        
+        ####### Creating background
+        
+        self.setup_background()
+        
+        TagSelector(self.root, self.setup_initialization)
+        
+    def setup_initialization(self):
 
         ####### Initialize arrays for CSV reading
 
@@ -44,10 +96,6 @@ class TranslatorApp:
 
         self.create_widgets()
         
-        ####### Creating background
-        
-        self.setup_background()
-
     ####### Defining other functions
 
     # Defining function to set up the window
@@ -121,20 +169,19 @@ class TranslatorApp:
             with open(self.csv_path, mode = 'r', encoding='utf-8') as file:     # mode = 'r' indicate that the file is being read # with ensures that the file gets closed at the end of the block # encoding utf-8 to read arabic letters
                 csv_reader = csv.DictReader(file)                               # DictReader reads the file as a dictionary (takes into account headers)
                 for row in csv_reader:
-                    self.tags.append(row['tag'])
-                    self.word_types.append(row['word_type'])
-                    self.english_words.append(row['english'])
-                    self.arabic_latin_words.append(row['arabic_latin'])
-                    self.arabic_words.append(row['arabic'])
+                    self.tags.append(row.get('tag'))
+                    self.word_types.append(row.get('word_type'))
+                    self.english_words.append(row.get('english'))
+                    self.arabic_latin_words.append(row.get('arabic_latin'))
+                    self.arabic_words.append(row.get('arabic'))
                     
         except:
             print("CSV file not found - using sample data")     # putting sample data if there is a problem when reading the CSV
-            self.english_words = ["Hello", "Goodbye", "Thank you"]
-            self.arabic_latin_words = ["Marhaba", "Ma3a el salam", "Shokran"]
-            
-            self.tags = ["مرحبا", "", ""]
-            self.word_types = ["", "", ""]
-            self.arabic_words = ["", "", ""]
+            self.english_words = ["Hello"] * 3
+            self.arabic_latin_words = ["Marhaba"] * 3
+            self.tags = ["1: most frequent"] * 3
+            self.word_types = ["P"] * 3
+            self.arabic_words = ["مرحبا"] * 3
 
     # Define widget creation
 
