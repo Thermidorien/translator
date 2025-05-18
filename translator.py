@@ -27,6 +27,7 @@ class TagSelector:
         # self.frame.grid_columnconfigure(0, weight=1)
         # self.frame.grid_rowconfigure(0, weight=1)
         
+        # Button to load tags into app
         self.button_load_tags = tk.Button(
             self.frame, 
             text="Load Tags", 
@@ -42,7 +43,10 @@ class TagSelector:
         # self.test.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")
         self.button_load_tags.pack(padx=50, pady=50, anchor='w') 
         
+        # Getting the list of unique tags through load_tags
         self.tags = self.load_tags()
+        
+        # initializing tag_vars as a dictionary which will take a unique tag as a key and the "variable" (boolean object) as its associated variable
         self.tag_vars = {}
         
         for tag in self.tags:
@@ -64,11 +68,13 @@ class TagSelector:
         ).pack()
         
     def test(self):
+        print(self.tag_vars)
         for tag in self.tags:
             print(self.tag_vars.get(tag).get())    
         
+    # Define function to get list of unique tags 
     def load_tags(self):
-        tags = set()
+        tags = set()    # set() returns a list or array of unique tag values
         with open(self.tag_path, 'r', encoding='utf-8') as file:
             csv_reader = csv.DictReader(file) 
             for row in csv_reader:
@@ -77,10 +83,12 @@ class TagSelector:
         
         
     def return_to_app(self):
-        
+        selected_tags = []
+        for tag in self.tag_vars:
+            if self.tag_vars.get(tag).get():
+                selected_tags.append(tag)
         self.frame.destroy()
-        self.start_app()
-    
+        self.start_app(selected_tags)
     
 
 class TranslatorApp:
@@ -116,20 +124,20 @@ class TranslatorApp:
         
         TagSelector(self.root, self.setup_initialization, self.csv_path)
         
-    def setup_initialization(self):
+    def setup_initialization(self, selected_tags):
 
+        ####### Defining tags selected in TagSelector
+        self.selected_tags = selected_tags
+        print(self.selected_tags)
+        
         ####### Initialize arrays for CSV reading
-
         self._init_data()
 
         ####### Reading CSV
-
         self.load_csv_data()
 
         ####### Creating widgets and containers
-
         self.current_index = random.randint(0, len(self.english_words)-1)     # set up index
-
         self.create_widgets()
         
     ####### Defining other functions
@@ -205,11 +213,12 @@ class TranslatorApp:
             with open(self.csv_path, mode = 'r', encoding='utf-8') as file:     # mode = 'r' indicate that the file is being read # with ensures that the file gets closed at the end of the block # encoding utf-8 to read arabic letters
                 csv_reader = csv.DictReader(file)                               # DictReader reads the file as a dictionary (takes into account headers)
                 for row in csv_reader:
-                    self.tags.append(row.get('tag'))
-                    self.word_types.append(row.get('word_type'))
-                    self.english_words.append(row.get('english'))
-                    self.arabic_latin_words.append(row.get('arabic_latin'))
-                    self.arabic_words.append(row.get('arabic'))
+                    if (row.get('tag') in self.selected_tags) or (not self.selected_tags):  # 2 conditions: if tag is in the selected tag, or if nothing cosem choose everything
+                        self.tags.append(row.get('tag'))
+                        self.word_types.append(row.get('word_type'))
+                        self.english_words.append(row.get('english'))
+                        self.arabic_latin_words.append(row.get('arabic_latin'))
+                        self.arabic_words.append(row.get('arabic'))
                     
         except:
             print("CSV file not found - using sample data")     # putting sample data if there is a problem when reading the CSV
@@ -223,16 +232,16 @@ class TranslatorApp:
 
     def create_widgets(self):
 
-        self.root.grid_rowconfigure(0, weight=5)
-        self.root.grid_rowconfigure(1, weight=5)
-        self.root.grid_rowconfigure(2, weight=5)
-        self.root.grid_rowconfigure(3, weight=5)
+        self.root.grid_rowconfigure(0, weight=2)
+        self.root.grid_rowconfigure(1, weight=2)
+        self.root.grid_rowconfigure(2, weight=2)
+        self.root.grid_rowconfigure(3, weight=2)
         self.root.grid_rowconfigure(4, weight=1)
         self.root.grid_columnconfigure(0, weight=2)
         self.root.grid_columnconfigure(1, weight=1)
 
         # English word as a label
-        self.word_label = tk.Label(self.root, text=self.english_words[self.current_index], font=("Arial", 15), bg="lightblue")
+        self.word_label = tk.Label(self.root, text=self.english_words[self.current_index], font=("Arial", 15), bg="lightblue", wraplength = 200)
         self.word_label.grid(row=0, column=0, padx=10, pady=20, sticky="nsew")    # sticky sets the limits of cell, sticking the widget to the limits. nsew are coordinates, north south east west
 
         # toggle boolean counter
@@ -304,9 +313,9 @@ class TranslatorApp:
         self.button_next.grid(row=3, column=1, padx=10, pady=20, sticky="nsew")
         
         # button for return to tag selector
-        self.to_tag_selector = tk.Button(
+        self.button_tag_selector = tk.Button(
             self.root, 
-            text="Return to tag selection", 
+            text=self.tags[self.current_index], 
             font=("Arial", 15), 
             fg="white", 
             bg="#383328", 
@@ -316,7 +325,7 @@ class TranslatorApp:
             bd=5, 
             command=self.return_to_tag_selector
         )
-        self.to_tag_selector.grid(row=4, column=0, columnspan=2, padx=80, pady=5, sticky="nsew")
+        self.button_tag_selector.grid(row=4, column=0, columnspan=2, padx=80, pady=30, sticky="nsew") #  columnspan=2 puts it accross multiple columns
 
     # Define word update functions for buttons
 
@@ -329,7 +338,8 @@ class TranslatorApp:
         self.word_type_label.config(text=self.word_types[self.current_index]) # Update type label text
         self.translation_label.config(text=self.arabic_latin_words[self.current_index])  # Update translation label text
         self.arabic_translation_label.config(text=self.arabic_words[self.current_index])  # Update arabic translation label text
-
+        self.button_tag_selector.config(text=self.tags[self.current_index])
+        
         # Removing show labels
         self.show_is_visible = False
         self.translation_label.grid_remove()
@@ -361,7 +371,7 @@ class TranslatorApp:
     # define returning to tag selector
     
     def return_to_tag_selector(self):
-        self.children = self.root.winfo_children()
+        self.children = self.root.winfo_children()  # returns a list of all child widgets in a parent widget, here inside of root
         for widget in self.children:
             if widget != self.bg_label:
                 widget.destroy()
@@ -431,7 +441,7 @@ remaining checklist:
  
 4. maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells// DONE
 5. adding new labels and buttons for remaining csv columns // DONE
-6. adding front page to select word tags (Implement word categories/filtering) // IN PROGRESS
+6. adding front page to select word tags (Implement word categories/filtering) // DONE
 7. adding background // DONE
 8. setting enter as "Check" // DONE
 9. Improve the visual design // DONE
