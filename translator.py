@@ -20,16 +20,42 @@ class TagSelector:
         
         self.start_app = start_app
         self.tag_path = tag_path
-        self.frame = tk.Frame(root, bg='')  # bg='' makes sure the frame has no background
+        
+        # self.frame = tk.Frame(root, bg='')  # bg='' makes sure the frame has no background
         # self.frame.grid(row=0, column=0, sticky="nsew")   
-        self.frame.pack(fill='both', expand=True)   
+        # self.frame.pack(fill='both', expand=True)   
+        
+        # Create a main frame with fixed propagation
+        self.main_frame = tk.Frame(self.root)
+        self.main_frame.pack(fill='both', expand=True)
+        
+        self.main_frame.pack_propagate(False)
+        
+        # Create a canvas with scrollbar
+        self.canvas = tk.Canvas(self.main_frame)
+        self.scrollbar = tk.Scrollbar(self.main_frame, orient="vertical", command=self.canvas.yview)
+        self.inner_frame = tk.Frame(self.canvas)
+        
+        # Configure canvas scrolling
+        self.inner_frame.bind("<Configure>", self._inner_frame_bind)
+        
+        self.canvas.create_window((0, 0), window=self.inner_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
         
         # self.frame.grid_columnconfigure(0, weight=1)
         # self.frame.grid_rowconfigure(0, weight=1)
         
+        self.setup_widgets()
+    
+    # Define function to setup up load_tags button, check buttons for every tag, and a test button for debugging purposes
+    def setup_widgets(self):
         # Button to load tags into app
         self.button_load_tags = tk.Button(
-            self.frame, 
+            self.inner_frame, 
             text="Load Tags", 
             font=("Arial", 15), 
             fg="white",                     # text color
@@ -50,12 +76,15 @@ class TagSelector:
         self.tag_vars = {}
         
         for tag in self.tags:
-            variable = tk.BooleanVar()
-            tk.Checkbutton(self.frame, var=variable, text=tag, font=("Arial", 15)).pack(padx=50, pady=2, anchor='w')
+            value = None
+            if tag == "1: most frequent":
+                value = True
+            variable = tk.BooleanVar(value=value)
+            tk.Checkbutton(self.inner_frame, var=variable, text=tag, font=("Arial", 15)).pack(padx=50, pady=2, anchor='w')
             self.tag_vars[tag] = variable
         
         self.test = tk.Button(
-            self.frame, 
+            self.inner_frame, 
             text="test", 
             font=("Arial", 15), 
             fg="white",                     # text color
@@ -66,7 +95,8 @@ class TagSelector:
             bd=5,                           # border width
             command=self.test 
         ).pack()
-        
+    
+    # Define test function for debugging purposes
     def test(self):
         print(self.tag_vars)
         for tag in self.tags:
@@ -79,17 +109,19 @@ class TagSelector:
             csv_reader = csv.DictReader(file) 
             for row in csv_reader:
                 tags.add(row.get('tag'))
-        return tags
-        
-        
+        return tags     
+    
+    # Define function destroying the whole frame while recalling the main application frame with the selected tags
     def return_to_app(self):
         selected_tags = []
         for tag in self.tag_vars:
             if self.tag_vars.get(tag).get():
                 selected_tags.append(tag)
-        self.frame.destroy()
+        self.main_frame.destroy()
         self.start_app(selected_tags)
     
+    def _inner_frame_bind(self, event=None):
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
 class TranslatorApp:
 
@@ -118,12 +150,29 @@ class TranslatorApp:
         self._setup_window()
         self._setup_icon()
         
+        self.fullscreen_boolean = False
+        self.root.attributes("-fullscreen", self.fullscreen_boolean)  # Fullscreen mode
+        
+        self.root.bind("<Escape>", self.escape_fullscreen)
+        self.root.bind("<F11>", self.toggle_fullscreen)
+        
         ####### Creating background
         
         self.setup_background()
         
         TagSelector(self.root, self.setup_initialization, self.csv_path)
         
+    def escape_fullscreen(self, event=None):
+        self.fullscreen_boolean = False
+        self.root.attributes("-fullscreen", self.fullscreen_boolean)
+
+    def toggle_fullscreen(self, event=None):
+        if not self.fullscreen_boolean:
+            self.root.attributes("-fullscreen", True)
+        else:
+            self.root.attributes("-fullscreen", False)
+        self.fullscreen_boolean = not self.fullscreen_boolean
+          
     def setup_initialization(self, selected_tags):
 
         ####### Defining tags selected in TagSelector
@@ -143,7 +192,6 @@ class TranslatorApp:
     ####### Defining other functions
 
     # Defining function to set up the window
-
     def _setup_window(self):
         self.root.title("Translator")
         # self.root.minsize(300, int(300 / self.aspect_ratio))  # Enforce minimum size
@@ -175,7 +223,6 @@ class TranslatorApp:
         new_width = event.width
         new_height = int(new_width / self.aspect_ratio)
 
-
         # this can create an infinite loop: User resizes window → `<Configure>` event → `geometry()` changes size → Another `<Configure>` event → `geometry()` changes size → ... (∞ loop)
         # to avoid this we fix the size the moment the event is finished and the size of the window is different from the original size
         if (event.height != new_height):
@@ -183,6 +230,8 @@ class TranslatorApp:
             self._resize_active = True
             self.root.unbind("<Configure>")
             self.root.geometry(str(new_width) + "x" + str(new_height))
+            if hasattr(self, 'bg_label'):
+                self.bg_label.place_configure(relwidth=1, relheight=1)
             self.root.after(10, self._enable_resize_checking)  # Delay resize
 
     def _enable_resize_checking(self):
@@ -190,7 +239,6 @@ class TranslatorApp:
         self.root.bind("<Configure>", self._fix_aspect_ratio)
 
     # Defining internal function: icon setup
-
     def _setup_icon(self):
         try:
             self.root.iconbitmap(self.icon_path)
@@ -198,7 +246,6 @@ class TranslatorApp:
             print("Icon file not found - using default icon")
 
     # Defining internal function: internal data structures to be used
-
     def _init_data(self):
         self.tags = []               # initializing arrays to get appended from csv file
         self.word_types = []
@@ -207,7 +254,6 @@ class TranslatorApp:
         self.arabic_words = []
 
     # Define CSV loading data
-
     def load_csv_data(self):
         try:
             with open(self.csv_path, mode = 'r', encoding='utf-8') as file:     # mode = 'r' indicate that the file is being read # with ensures that the file gets closed at the end of the block # encoding utf-8 to read arabic letters
@@ -229,7 +275,6 @@ class TranslatorApp:
             self.arabic_words = ["مرحبا"] * 3
 
     # Define widget creation
-
     def create_widgets(self):
 
         self.root.grid_rowconfigure(0, weight=2)
@@ -328,7 +373,6 @@ class TranslatorApp:
         self.button_tag_selector.grid(row=4, column=0, columnspan=2, padx=80, pady=30, sticky="nsew") #  columnspan=2 puts it accross multiple columns
 
     # Define word update functions for buttons
-
     def next_word(self):
         # updating index
         self.current_index = random.randint(0, len(self.english_words)-1)
@@ -355,7 +399,6 @@ class TranslatorApp:
         self.button_show_hide.config(state="normal")  
 
     # define checking entry
-        
     def check_word(self):       
         user_input = self.word_entry.get().strip()
         correct_answer = self.arabic_latin_words[self.current_index].lower()
@@ -369,16 +412,16 @@ class TranslatorApp:
             self.word_entry.config(bg="pink")
             
     # define returning to tag selector
-    
     def return_to_tag_selector(self):
         self.children = self.root.winfo_children()  # returns a list of all child widgets in a parent widget, here inside of root
         for widget in self.children:
             if widget != self.bg_label:
                 widget.destroy()
         TagSelector(self.root, self.setup_initialization, self.csv_path)
+        if hasattr(self, 'bg_label'):
+            self.bg_label.lower()
     
     # define toggling the answer labels
-
     def toggle_answer(self):
         if self.show_is_visible:
             self.translation_label.grid_remove()
@@ -391,7 +434,6 @@ class TranslatorApp:
         self.show_is_visible = not self.show_is_visible
         
     # Defining the binding to Enter key ependng on the status of the entry, whether correct or not
-        
     def binding_enter(self, event=None):     # Adding event in case Enter key on keyboard is clicked. It has to be set equal to None, because otherwise an error gets called when clicking on the button instead of typing enter, since the event is undefined otherwise
         if self.button_check.cget("state") == "disabled":   # 
             self.next_word()
@@ -399,7 +441,6 @@ class TranslatorApp:
             self.check_word()
            
     # Defining background setup
-    
     def setup_background(self):
         try:
             self.background_path = os.path.join(self.script_dir, "resources", "image.png")
@@ -427,9 +468,9 @@ if __name__ == "__main__":      # this is true when the script is ran directly, 
 
 """
 remaining checklist:
-1. constant aspect ratio // DONE
-2. checking if we can hide labels // DONE
-3. checking if we can either hide or grey out buttons // DONE
+1.  constant aspect ratio // DONE
+2.  checking if we can hide labels // DONE
+3.  checking if we can either hide or grey out buttons // DONE
     --> Wanted behaviour: 
         --> when success after check (in check_word) (done)
         --> grey check button (in check_word) (done)
@@ -439,10 +480,15 @@ remaining checklist:
         --> change states of button back to normal after hitting next (in next_word) (done)
         --> revert bind event Enter to check button (done)
  
-4. maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells// DONE
-5. adding new labels and buttons for remaining csv columns // DONE
-6. adding front page to select word tags (Implement word categories/filtering) // DONE
-7. adding background // DONE
-8. setting enter as "Check" // DONE
-9. Improve the visual design // DONE
+4.  maximizing size of containers and depending on size of frame/window and matching size of text, or centering them in cells// DONE
+5.  adding new labels and buttons for remaining csv columns // DONE
+6.  adding front page to select word tags (Implement word categories/filtering) // DONE
+7.  adding background // DONE
+8.  setting enter as "Check" // DONE
+9.  Improve the visual design // DONE
+10. Developping this as an .exe
+11. Developping this as an Android application
+12. Listing Requirements for tool
+13. Developping testing procedure for tool
+14. Developping CI/CD for tool for each release
 """
