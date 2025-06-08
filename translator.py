@@ -138,7 +138,7 @@ class TranslatorApp:
 
         self.script_dir = os.path.dirname(os.path.abspath(__file__))             # gets absolute path of this file, then gets direcory
         self.icon_path = os.path.join(self.script_dir, "resources", "icon.ico")       # Icon in the resources folder
-        self.csv_path = os.path.join(self.script_dir, "resources", "book1.csv")        # CSV in the resources folder
+        self.csv_path = os.path.join(self.script_dir, "resources", "data.csv")        # CSV in the resources folder
 
         ####### Setting up application
 
@@ -490,5 +490,5 @@ remaining checklist:
 11. Developping this as an Android application
 12. Listing Requirements for tool
 13. Developping testing procedure for tool
-14. Developping CI/CD for tool for each release
+14. Developping CI/CD for tool for each release // Don't know if that'll be possible
 """
