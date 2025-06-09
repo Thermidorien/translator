@@ -98,7 +98,6 @@ class TagSelector:
     
     # Define test function for debugging purposes
     def test(self):
-        print(self.tag_vars)
         for tag in self.tags:
             print(self.tag_vars.get(tag).get())    
         
@@ -109,7 +108,7 @@ class TagSelector:
             csv_reader = csv.DictReader(file) 
             for row in csv_reader:
                 tags.add(row.get('tag'))
-        return tags     
+        return sorted(tags)     # sorted to order alphabetically     
     
     # Define function destroying the whole frame while recalling the main application frame with the selected tags
     def return_to_app(self):
@@ -357,6 +356,21 @@ class TranslatorApp:
         )
         self.button_next.grid(row=3, column=1, padx=10, pady=20, sticky="nsew")
         
+        # button for correction of arabic_latin word in csv
+        self.button_csv_correction = tk.Button(
+            self.root, 
+            text="Correct", 
+            font=("Arial", 15), 
+            fg="white", 
+            bg="#a2aecc", 
+            activebackground="#dddff4", 
+            activeforeground="white", 
+            relief="raised", 
+            bd=5, 
+            command=self.word_correction
+        )
+        self.button_csv_correction.grid(row=4, column=1, padx=10, pady=20, sticky="nsew")
+        
         # button for return to tag selector
         self.button_tag_selector = tk.Button(
             self.root, 
@@ -370,7 +384,7 @@ class TranslatorApp:
             bd=5, 
             command=self.return_to_tag_selector
         )
-        self.button_tag_selector.grid(row=4, column=0, columnspan=2, padx=80, pady=30, sticky="nsew") #  columnspan=2 puts it accross multiple columns
+        self.button_tag_selector.grid(row=4, column=0, padx=10, pady=20, sticky="nsew") #  columnspan=2 puts it accross multiple columns
 
     # Define word update functions for buttons
     def next_word(self):
@@ -420,6 +434,38 @@ class TranslatorApp:
         TagSelector(self.root, self.setup_initialization, self.csv_path)
         if hasattr(self, 'bg_label'):
             self.bg_label.lower()
+    
+    # define csv word correction
+    def word_correction(self):
+        corrected_word  = self.word_entry.get().strip().lower()
+        
+        if not corrected_word:  # ignore if field is empty
+            return
+
+        try:
+            with open(self.csv_path, 'r', encoding='utf-8') as file:
+                csv_reader = csv.DictReader(file)  
+                rows = list(csv_reader)
+                fieldnames = rows[0].keys()
+
+            updated = False
+            
+            for row in rows:
+                if row['english'] == self.english_words[self.current_index]:
+                    row['arabic_latin'] = corrected_word
+                    updated = True
+                    break
+            
+            if updated:
+                with open(self.csv_path, 'w', encoding='utf-8', newline='') as file:
+                    csv_writer = csv.DictWriter(file, fieldnames=fieldnames)
+                    csv_writer.writeheader()
+                    csv_writer.writerows(rows)
+            
+            self.arabic_latin_words[self.current_index] = corrected_word
+            self.translation_label.config(text=corrected_word)
+        except Exception as e:
+            print("Error saving correction: "+ e)
     
     # define toggling the answer labels
     def toggle_answer(self):
