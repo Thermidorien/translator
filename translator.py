@@ -2,6 +2,7 @@ import tkinter as tk            # required to make application
 import random
 import os               # os.path allows to construct a cross-platform path
 import csv
+import sys
 from tkinter import PhotoImage  # required to import images like background
 
 class TagSelector:
@@ -134,8 +135,10 @@ class TranslatorApp:
         """
 
         ####### Establishing paths
-
-        self.script_dir = os.path.dirname(os.path.abspath(__file__))             # gets absolute path of this file, then gets direcory
+        if getattr(sys, 'frozen', False):   # getattr(object, attribute_name, default(Value to return if the attribute is missing (optional)))
+            self.script_dir = sys._MEIPASS  # Temp folder where PyInstaller unpacks files
+        else:
+            self.script_dir = os.path.dirname(os.path.abspath(__file__))             # gets absolute path of this file, then gets direcory
         self.icon_path = os.path.join(self.script_dir, "resources", "icon.ico")       # Icon in the resources folder
         self.csv_path = os.path.join(self.script_dir, "resources", "data.csv")        # CSV in the resources folder
 
@@ -537,4 +540,14 @@ remaining checklist:
 12. Listing Requirements for tool
 13. Developping testing procedure for tool
 14. Developping CI/CD for tool for each release // Don't know if that'll be possible
+"""
+
+""" to build exe, enter the following command line:
+    
+pyinstaller --onefile --windowed --icon=resources\icon.ico --add-data "resources\icon.ico;resources" --add-data "resources\data.csv;resources" --add-data "resources\image.png;resources" translator.py 
+
+or
+
+pyinstaller --onefile --windowed --icon=resources\icon.ico --add-data "resources;resources" translator.py 
+
 """
